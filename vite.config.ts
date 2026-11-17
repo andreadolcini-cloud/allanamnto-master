@@ -12,7 +12,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+        includeAssets: ['favicon.ico', 'icon.svg', 'apple-touch-icon.png', 'assets/aistudio/Designer1_6722ae60.png'],
         manifest: {
           id: '/',
           name: 'Allenamento Aerobico MASTER',

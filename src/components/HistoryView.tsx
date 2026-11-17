@@ -1,20 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Trash2, User } from 'lucide-react';
-import type { UserProfile, WorkoutSessionLog } from '../types/fitness';
-import { HR_ZONES, computeMaxHr, formatDuration } from '../utils/hrZones';
+import { Trash2 } from 'lucide-react';
+import type { WorkoutSessionLog } from '../types/fitness';
+import { HR_ZONES, formatDuration } from '../utils/hrZones';
 
 interface HistoryViewProps {
+  userName: string;
   history: WorkoutSessionLog[];
   onDeleteSession: (id: string) => void;
-  userProfile: UserProfile;
-  onUpdateProfile: (profile: UserProfile) => void;
 }
 
 export const HistoryView: React.FC<HistoryViewProps> = ({
+  userName,
   history,
   onDeleteSession,
-  userProfile,
-  onUpdateProfile,
 }) => {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     history[0]?.id ?? null
@@ -32,7 +30,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
   const recentForChart = useMemo(() => [...history].slice(0, 10).reverse(), [history]);
   const selectedSession = history.find((s) => s.id === selectedSessionId) ?? history[0] ?? null;
-  const maxHr = computeMaxHr(userProfile.age);
 
   const sourceLabel = (src: WorkoutSessionLog['hrSourceUsed']) => {
     if (src === 'bluetooth') return 'Fascia BLE';
@@ -43,89 +40,15 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* User Physiology Profile */}
-      <section className="rounded-xl border border-slate-800 bg-[#0F141D] p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-cyan-400" />
-            <h2 className="font-display text-2xl font-bold tracking-tight text-white">
-              Profilo Fisiologico &amp; Zone Cardiache
-            </h2>
-          </div>
-          <span className="font-mono-tabular text-xs text-slate-400">
-            FC Massima (Tanaka): <strong className="text-white">{maxHr} BPM</strong>
-          </span>
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div>
-            <label className="block text-xs font-medium text-slate-300">Età (anni)</label>
-            <input
-              type="number"
-              min={14}
-              max={90}
-              value={userProfile.age}
-              onChange={(e) =>
-                onUpdateProfile({
-                  ...userProfile,
-                  age: Math.max(14, Math.min(90, Number(e.target.value) || 30)),
-                })
-              }
-              className="font-mono-tabular mt-1 w-full rounded-lg border border-slate-700 bg-[#07090E] px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none min-h-[42px]"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-300">Peso (kg)</label>
-            <input
-              type="number"
-              min={35}
-              max={200}
-              value={userProfile.weightKg}
-              onChange={(e) =>
-                onUpdateProfile({
-                  ...userProfile,
-                  weightKg: Math.max(35, Math.min(200, Number(e.target.value) || 70)),
-                })
-              }
-              className="font-mono-tabular mt-1 w-full rounded-lg border border-slate-700 bg-[#07090E] px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none min-h-[42px]"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-300">FC a Riposo (BPM)</label>
-            <input
-              type="number"
-              min={35}
-              max={110}
-              value={userProfile.restingBpm}
-              onChange={(e) =>
-                onUpdateProfile({
-                  ...userProfile,
-                  restingBpm: Math.max(35, Math.min(110, Number(e.target.value) || 60)),
-                })
-              }
-              className="font-mono-tabular mt-1 w-full rounded-lg border border-slate-700 bg-[#07090E] px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none min-h-[42px]"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {HR_ZONES.map((z) => {
-            const minBpm = Math.round((maxHr * z.minPct) / 100);
-            const maxBpm = Math.round((maxHr * z.maxPct) / 100);
-            return (
-              <div
-                key={z.id}
-                className="rounded-lg border border-slate-800 bg-[#07090E] px-3 py-2 text-xs"
-              >
-                <div className={`font-semibold ${z.textClass}`}>{z.shortLabel}</div>
-                <div className="font-mono-tabular mt-0.5 text-slate-300">
-                  {minBpm}–{maxBpm} BPM
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* Header Context */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-display text-3xl font-bold tracking-tight text-white">
+          Storico Allenamenti · {userName}
+        </h2>
+        <span className="text-xs text-slate-400">
+          Dati fisiologici e sensori configurabili in Impostazioni
+        </span>
+      </div>
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -162,7 +85,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       {history.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-800 bg-[#0F141D]/60 p-10 text-center">
           <p className="text-sm font-semibold text-slate-200">
-            Nessun allenamento registrato finora
+            Nessun allenamento registrato per {userName}
           </p>
           <p className="mt-1 text-xs text-slate-400">
             Completa una sessione nella scheda Allenamento per visualizzare grafici di frequenza cardiaca, intensità e tempo nelle zone.
@@ -172,10 +95,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* Sessions List */}
           <div className="rounded-xl border border-slate-800 bg-[#0F141D] p-4 lg:col-span-6">
-            <h3 className="font-display text-2xl font-bold text-white mb-3">
-              Registro Sessioni
-            </h3>
-            <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            <h3 className="font-display mb-3 text-2xl font-bold text-white">Registro Sessioni</h3>
+            <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
               {history.map((s) => {
                 const isSelected = selectedSession?.id === s.id;
                 const dateStr = new Date(s.completedAt).toLocaleDateString('it-IT', {
@@ -299,7 +220,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       {selectedSession.programName}
                     </h4>
                   </div>
-                  <div className="text-right font-mono-tabular text-xs text-slate-300">
+                  <div className="font-mono-tabular text-right text-xs text-slate-300">
                     <div>Max: {selectedSession.maxBpm ?? '--'} BPM</div>
                     <div>{selectedSession.estimatedKcal} kcal</div>
                   </div>

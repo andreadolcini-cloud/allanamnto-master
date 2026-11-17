@@ -452,7 +452,7 @@ interface ExerciseAnimationProps {
   active?: boolean;
   accentColor?: string;
   speedMultiplier?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -472,6 +472,7 @@ export const ExerciseAnimation: React.FC<ExerciseAnimationProps> = ({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!active || prefersReduced) {
+      setPhase(0);
       return;
     }
 
@@ -497,6 +498,8 @@ export const ExerciseAnimation: React.FC<ExerciseAnimationProps> = ({
       ? 'h-14 w-14'
       : size === 'lg'
       ? 'h-32 w-32 sm:h-36 sm:w-36'
+      : size === 'xl'
+      ? 'h-44 w-44 sm:h-56 sm:w-56 lg:h-64 lg:w-64'
       : 'h-24 w-24';
 
   return (

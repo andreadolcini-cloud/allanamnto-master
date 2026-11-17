@@ -36,7 +36,7 @@ class AudioCueEngine {
   }
 
   public playCountdownTick() {
-    this.playTone(660, 90, 'triangle', 0.12);
+    this.playTone(740, 120, 'triangle', 0.18);
   }
 
   public playWorkStart() {

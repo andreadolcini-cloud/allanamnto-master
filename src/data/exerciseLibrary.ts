@@ -1,4 +1,4 @@
-import type { ExerciseAnimationId, HeartRateZoneId, StepPhase } from '../types/fitness';
+import type { ExerciseAnimationId, HeartRateZoneId, StepPhase, WorkoutStep } from '../types/fitness';
 
 export interface ExerciseTemplate {
   animationId: ExerciseAnimationId;
@@ -9,6 +9,12 @@ export interface ExerciseTemplate {
   focus: string;
   cue: string;
 }
+
+export const FLOOR_ANIMATION_IDS = new Set<ExerciseAnimationId>([
+  'mountain-climbers',
+  'burpees',
+  'plank-jacks',
+]);
 
 export const EXERCISE_LIBRARY: ExerciseTemplate[] = [
   {
@@ -123,7 +129,7 @@ export const EXERCISE_LIBRARY: ExerciseTemplate[] = [
 
 export function inferAnimationId(title: string, phase: StepPhase): ExerciseAnimationId {
   const t = title.toLowerCase();
-  if (t.includes('jumping') || t.includes('jack') && !t.includes('plank')) return 'jumping-jacks';
+  if (t.includes('jumping') || (t.includes('jack') && !t.includes('plank'))) return 'jumping-jacks';
   if (t.includes('plank')) return 'plank-jacks';
   if (t.includes('mountain') || t.includes('climber')) return 'mountain-climbers';
   if (t.includes('burpee')) return 'burpees';
@@ -138,4 +144,58 @@ export function inferAnimationId(title: string, phase: StepPhase): ExerciseAnima
     return 'breathing-cooldown';
   }
   return 'jumping-jacks';
+}
+
+export function isFloorExercise(
+  step: Pick<WorkoutStep, 'title' | 'phase' | 'animationId'>
+): boolean {
+  if (step.phase === 'warmup' || step.phase === 'cooldown' || step.phase === 'rest') {
+    return false;
+  }
+  const animId = step.animationId ?? inferAnimationId(step.title, step.phase);
+  if (FLOOR_ANIMATION_IDS.has(animId)) return true;
+
+  const t = step.title.toLowerCase();
+  return (
+    t.includes('plank') ||
+    t.includes('burpee') ||
+    t.includes('mountain') ||
+    t.includes('climber') ||
+    t.includes('push-up') ||
+    t.includes('pushup') ||
+    t.includes('piegament') ||
+    t.includes('crunch') ||
+    t.includes('addominal') ||
+    t.includes('a terra')
+  );
+}
+
+export function filterStandingOnlySteps(steps: WorkoutStep[]): {
+  filtered: WorkoutStep[];
+  removedCount: number;
+} {
+  const result: WorkoutStep[] = [];
+  let removedCount = 0;
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    if (isFloorExercise(step)) {
+      removedCount += 1;
+      // Skip immediately following rest block tied to the removed floor exercise
+      if (steps[i + 1]?.phase === 'rest') {
+        i += 1;
+      }
+      continue;
+    }
+
+    // Avoid consecutive rest blocks if any remained
+    if (step.phase === 'rest' && result[result.length - 1]?.phase === 'rest') {
+      result[result.length - 1] = step;
+      continue;
+    }
+
+    result.push(step);
+  }
+
+  return { filtered: result, removedCount };
 }

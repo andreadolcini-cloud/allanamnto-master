@@ -100,3 +100,25 @@ export interface UserProfile {
   weightKg: number;
   restingBpm: number;
 }
+
+export interface CameraSettings {
+  facingMode: 'user' | 'environment';
+  selectedDeviceId: string;
+  mirrored: boolean;
+  hrMode: VideoHRMode;
+  showOverlay: boolean;
+}
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  profile: UserProfile;
+  workoutIntensity: WorkoutIntensity;
+  standingOnly: boolean;
+  programs: WorkoutProgram[];
+  schedule: WeeklySchedule;
+  history: WorkoutSessionLog[];
+  audioMuted: boolean;
+  cameraSettings: CameraSettings;
+}
+
