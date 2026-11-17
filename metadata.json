@@ -1,0 +1,10 @@
+{
+  "name": "Allenamento Aerobico ",
+  "description": "App per programmare allenamenti aerobici con timer a intervalli, analisi video in tempo reale di intensità e frequenza cardiaca stimata (rPPG) e supporto cardiofrequenzimetro Bluetooth.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
